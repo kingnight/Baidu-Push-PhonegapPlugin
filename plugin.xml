@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
+           id="com.aisino.plugin.push"
+      version="0.1.1">
+    <name>PushManager</name>
+    <description>Cordova Baidu PushManager Plugin</description>
+    <license>Apache</license>
+    <keywords>cordova,PushManager</keywords>
+
+    
+
+    <!-- android -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="PushManager" >
+                <param name="android-package" value="com.aisino.plugin.push.PushDemoActivity"/>
+            </feature>
+        </config-file>
+        <js-module src="www/android/PushManager.js" name="PushManager">
+        	<clobbers target="window.plugin.pushManager" />
+    		</js-module>
+    		<info>
+				 	1、Create a libs folder in the project if libs folder is not exit.
+					2、Copy the pushservice-VERSION.jar to the  libs folder and copy  the libbdpush_V1_0. So to the libs/armeabi folder.
+					3、Add the jars to the project through the Java Build Path
+				</info>
+				<config-file target="AndroidManifest.xml" parent="/manifest">
+				  <!-- Push service 运行需要的权限 -->
+					<uses-permission android:name="android.permission.INTERNET"/>
+					<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+					<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+					<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+					<uses-permission android:name="android.permission.BROADCAST_STICKY" />
+					<uses-permission android:name="android.permission.WRITE_SETTINGS" />
+					<uses-permission android:name="android.permission.VIBRATE" />
+					<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+					<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+					<uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+					<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+					<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+				</config-file>
+				
+				
+				<config-file target="AndroidManifest.xml" parent="/manifest/application">
+				   <activity
+            android:name="com.aisino.plugin.push.PushDemoActivity"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/app_name" >
+	        </activity>
+	         
+	        <activity
+	            android:name="com.aisino.plugin.push.CustomActivity"
+	            android:configChanges="orientation|keyboardHidden"
+	            android:label="Push_notification_test" >
+	        </activity>
+	
+	        <!-- push service rich media display -->
+	        <activity
+	            android:name="com.baidu.android.pushservice.richmedia.MediaViewActivity"
+	            android:configChanges="orientation|keyboardHidden"
+	            android:label="MediaViewActivity" >
+	        </activity>
+	        <activity
+	            android:name="com.baidu.android.pushservice.richmedia.MediaListActivity"
+	            android:configChanges="orientation|keyboardHidden"
+	            android:label="MediaListActivity"
+	            android:launchMode="singleTask" >
+	        </activity>
+	        
+	        <!-- push service client -->
+	        <receiver android:name="com.aisino.plugin.push.PushMessageReceiver">
+	            <intent-filter>
+	                <!-- 接收push消息 -->
+	                <action android:name="com.baidu.android.pushservice.action.MESSAGE" />
+	                <!-- 接收tagsinfo消息 -->
+	                <action android:name="com.baidu.android.pushservice.action.TAGS" />
+					<action android:name="com.baidu.android.pushservice.action.USERNAME" />
+	                <!-- 接收bind,unbind,fetch,delete等反馈消息 -->
+	                <action android:name="com.baidu.android.pushservice.action.RECEIVE" />
+	                <action android:name="com.baidu.android.pushservice.action.notification.CLICK" />
+	            </intent-filter>
+	        </receiver>
+	        
+	        <!-- push service -->
+	        <receiver android:name="com.baidu.android.pushservice.PushServiceReceiver"
+	            android:process=":bdservice_v1">
+	            <intent-filter>
+	                <action android:name="android.intent.action.BOOT_COMPLETED" />
+	                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+	                <action android:name="com.baidu.android.pushservice.action.notification.SHOW" />
+	                <action android:name="com.baidu.android.pushservice.action.media.CLICK" />
+	            </intent-filter>
+	        </receiver>
+	
+	        <receiver android:name="com.baidu.android.pushservice.RegistrationReceiver"
+	            android:process=":bdservice_v1">
+	            <intent-filter>
+	                <action android:name="com.baidu.android.pushservice.action.METHOD" />
+	                <action android:name="com.baidu.android.pushservice.action.BIND_SYNC" />
+	            </intent-filter>
+	            <intent-filter>
+	                <action android:name="android.intent.action.PACKAGE_REMOVED"/>
+	                <data android:scheme="package" />
+	            </intent-filter>                   
+	        </receiver>
+	        
+	        <service
+	            android:name="com.baidu.android.pushservice.PushService"
+	            android:exported="true"
+	            android:process=":bdservice_v1" />
+	        
+	        <!-- push service end -->
+	        
+					<!-- 在百度开发者中心查询应用的API Key -->
+	        <meta-data android:name="api_key" android:value="PmdxEvYG5HatSGXzCYzqWahT" />
+				</config-file>
+				
+				
+        <source-file src="src/android/PushDemoActivity.java" target-dir="src/com/aisino/plugin/push" />
+        <source-file src="src/android/CustomActivity.java" target-dir="src/com/aisino/plugin/push" />
+        <source-file src="src/android/LoginActivity.java" target-dir="src/com/aisino/plugin/push" />
+        <source-file src="src/android/PushMessageReceiver.java" target-dir="src/com/aisino/plugin/push" />
+        <source-file src="src/android/Utils.java" target-dir="src/com/aisino/plugin/push" />
+        <source-file src="src/android/HttpRequest.java" target-dir="src/com/aisino/plugin/push" />
+		<source-file src="libs/armeabi/libbdpush_V1_0.so" target-dir="libs/armeabi" />
+		<source-file src="libs/mips/libbdpush_V1_0.so" target-dir="libs/mips" />
+		<source-file src="libs/x86/libbdpush_V1_0.so" target-dir="libs/x86" />
+		<source-file src="libs/pushservice-2.4.0.jar" target-dir="libs" />
+		
+    </platform>
+		<!-- ios -->
+   <platform name="ios">
+       <config-file target="config.xml" parent="/*">
+           <feature name="PushManager">
+               <param name="ios-package" value="PushManager" />
+           </feature>
+       </config-file>
+
+       <js-module src="www/ios/PushManager.js" name="PushManager">
+          <clobbers target="window.plugin.pushManager" />
+       </js-module>
+        <!-- push lib -->
+       <header-file src="src/ios/lib/Base64.h" />
+       <source-file src="src/ios/lib/Base64.m" compiler-flags="-fno-objc-arc" />
+       <header-file src="src/ios/lib/Base64Defines.h" />
+       
+       <header-file src="src/ios/lib/GzipCompressor.h" />
+       <source-file src="src/ios/lib/GzipCompressor.m" compiler-flags="-fno-objc-arc" />
+       <header-file src="src/ios/lib/JSONKit.h" />
+       <source-file src="src/ios/lib/JSONKit.m" compiler-flags="-fno-objc-arc" />
+       <header-file src="src/ios/lib/BPush.h" />
+       <header-file src="src/ios/lib/OpenUDID.h" />
+       <source-file src="src/ios/lib/OpenUDID.m" compiler-flags="-fno-objc-arc" />
+       <header-file src="src/ios/lib/Reachability.h" />
+       <source-file src="src/ios/lib/Reachability.m" compiler-flags="-fno-objc-arc" />
+        <!-- push Supporting Files -->
+        <source-file src="src/ios/Supporting Files/BPushConfig.plist" />
+       <source-file src="src/ios/lib/libBPush.a" framework="true"/>
+        <source-file src="src/ios/Supporting Files/cat.caf" />
+       
+       
+       <header-file src="src/ios/PushManager.h" />
+       <source-file src="src/ios/PushManager.m" />
+       <framework src="Foundation.framework"  />
+       <framework src="CoreTelephony.framework"  />
+       <framework src="SystemConfiguration.framework" />
+       <framework src="libz.dylib"  />
+   </platform>
+		
+</plugin>
