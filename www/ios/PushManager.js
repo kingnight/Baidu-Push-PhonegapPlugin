@@ -1,9 +1,9 @@
 var exec = require("cordova/exec");
 var PushManager = function () {};
 
-PushManager.prototype.initWork = function(callback,username,serverurl) {    
+PushManager.prototype.initWork = function(succcb,failcb,username,serverurl) {
     //alert("push initwork");
-    exec(null, callback, "PushManager", "initWork",  [username,serverurl]);
+    exec(succcb, failcb, "PushManager", "initWork",  [username,serverurl]);
 };
 
 PushManager.prototype.stopWork = function() {    
