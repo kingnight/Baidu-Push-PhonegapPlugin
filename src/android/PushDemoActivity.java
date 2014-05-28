@@ -17,8 +17,9 @@ import android.R.string;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.util.Log;
-
+import com.baidu.frontia.FrontiaApplication;
 
 public class PushDemoActivity extends  CordovaPlugin{
 
@@ -33,7 +34,7 @@ public class PushDemoActivity extends  CordovaPlugin{
 	 private static final String LIST_TAGS="listTags";
 	 private static final String TAGS_INFO="getTagInfo";
 	 public static CallbackContext cbContext;
-	 
+	 public static final String TAG = PushDemoActivity.class.getSimpleName();
 
 	 public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
 			Log.d(PLUGIN_NAME, "Plugin execute called with action: " + action);
@@ -44,10 +45,20 @@ public class PushDemoActivity extends  CordovaPlugin{
 			 
 			if (action.equalsIgnoreCase(INIT_WORK)) {
 				try {
+					String packageName = cordova.getActivity().getClass().getPackage().getName();
+					PackageManager pkgMgt = cordova.getActivity().getPackageManager();
+					Intent mainintent = pkgMgt.getLaunchIntentForPackage(packageName);
+					String clazzName = mainintent.getComponent().getClassName();
+					Log.d(TAG, "clazzName=" + clazzName);
 					final String username= args.getString(0);
+					String serverurl = args.getString(1);
+					System.out.println("serverurl = "+serverurl);
 					Intent intent = new Intent(); 
 			        intent.setAction("com.baidu.android.pushservice.action.USERNAME");//发出自定义广播
 			        intent.putExtra("username", username);
+			        intent.putExtra("serverurl", serverurl);
+			        intent.putExtra("clazzName", clazzName);
+			        intent.putExtra("packageName", packageName);
 			        cordova.getActivity().sendBroadcast(intent);
 					cordova.getThreadPool().execute(new Runnable() {
 			            public void run() {
@@ -126,9 +137,14 @@ public class PushDemoActivity extends  CordovaPlugin{
 	    }
 	 
 	public void initWork(){
-		PushManager.startWork(cordova.getActivity(),
-				PushConstants.LOGIN_TYPE_API_KEY, 
-				Utils.getMetaValue(cordova.getActivity(), "api_key"));	
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                    PushManager.startWork(cordova.getActivity(),
+                            PushConstants.LOGIN_TYPE_API_KEY,
+                            Utils.getMetaValue(cordova.getActivity(), "api_key"));
+            }
+        });
+
 	}
 	
 	public void stopWork(){
