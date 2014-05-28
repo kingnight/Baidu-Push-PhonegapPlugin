@@ -97,6 +97,12 @@
                 NSLog(@"middletools server %@",str1);
             }
             
+            //add js callback for push userID and channelID
+            NSDictionary *pushCB=[[NSDictionary alloc] initWithObjectsAndKeys:userid,@"userID",channelid,@"channelID",appid,@"appID", nil];
+            
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:pushCB];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callid_init];
+            
         }
         else{
             NSString *code=[self translateBPushErrorCode:returnCode];
