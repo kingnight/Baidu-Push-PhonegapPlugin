@@ -8,7 +8,7 @@ plugin.xml中
     <!-- android -->
     <platform name="android">		
 		<!-- 在百度开发者中心查询应用的API Key -->
-	        <meta-data android:name="api_key" android:value="PmdxEvYG5HatSGXzCYzqWahT" />
+	        <meta-data android:name="api_key" android:value="" />
     </platform>
 
 其中的android:value需要修改为从百度开发者网站获得的API Key
