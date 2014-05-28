@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>pushManager Example</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+<body >
+
+<h1>push demo</h1>
+<br>
+<br>
+<input id ="btnInitWork" type="button" value="init">
+    </br>
+    </br>
+<input id ="btnSetTags" type="button" value="setTag">
+    </br>
+    </br>
+<input id ="btnDelTags" type="button" value="delTags">
+    </br>
+    </br>
+<input id ="btnListTags" type="button" value="ListTags(only Android)">
+    </br>
+    </br>
+<input id ="btnTagsinfo" type="button" value="Tagsinfo(only Android)">
+    
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/jQuery.js"></script>
+<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#btnInitWork").click(function() {
+		//alert("init");
+		window.plugin.pushManager.initWork(callbackSuccess,fail,"luoyadong","http://192.168.44.7:8080/MServer/updateEmpChannelInfo.search");
+	});	
+	$("#btnSetTags").click(function() {		
+		window.plugin.pushManager.setTags("tagA,tagB,tagC",success,fail);
+	});	
+	$("#btnDelTags").click(function() {		
+		window.plugin.pushManager.delTags("tagA,tagB",fail);
+	});
+    //only for android
+	$("#btnListTags").click(function() {		
+		window.plugin.pushManager.listTags(success);		   
+	});
+    //only for android              
+	$("#btnTagsinfo").click(function() {		
+		window.plugin.pushManager.getTagInfo(success);		   
+	});	
+	function success(args){
+		alert("success"+args);
+	}
+	function fail(args){
+		alert(args);
+	}
+	function callbackSuccess(args){
+		alert("userID = "+args.userID+"channelID = "+args.channelID+"appID = "+args.appID);
+	}
+});
+
+</script>   
+</body>
+</html>
