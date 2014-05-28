@@ -1,33 +1,41 @@
 # 推送插件 #
 
 # 1.Android客户端安装
-</br>
 
+## 1.1 修改原始插件的plugin.xml
 plugin.xml中
 
     <!-- android -->
-    <platform name="android">
-		
-
+    <platform name="android">		
 		<!-- 在百度开发者中心查询应用的API Key -->
 	        <meta-data android:name="api_key" android:value="PmdxEvYG5HatSGXzCYzqWahT" />
-
-
     </platform>
-
 
 其中的android:value需要修改为从百度开发者网站获得的API Key
 
-# 2.iOS客户端安装
+##  1.2 修改插件安装完成后生成的Android项目AndroidManifest.xml文件
+
+找到
+
+    <application android:debuggable="true" android:hardwareAccelerated="true" android:icon="@drawable/icon" android:label="@string/app_name" >
+
+添加 android:name="com.baidu.frontia.FrontiaApplication"到 <application>标签末尾
+
+    <application android:debuggable="true" android:hardwareAccelerated="true" android:icon="@drawable/icon" android:label="@string/app_name" android:name="com.baidu.frontia.FrontiaApplication">
+    
+
+# 2. iOS客户端安装
+
+## 2.1 Xcode中 Bundle Identifier 必须与在apple developer 官网申请的具有推送资格的appID完全一致
 </br>
-## 1.Xcode中 Bundle Identifier 必须与在apple developer 官网申请的具有推送资格的appID完全一致
+## 2.2 BPushConfig.plist中 API_KEY 需要添加从百度开发者网站获得的API Key ##
 </br>
-## 2.在主程序AppDelegate.m中作如下修改
+
+## 2.3 在开发的程序的主程序AppDelegate.m中，添加以下三个回调函数
 </br>
-###2.1添加头文件
+**添加头文佳引入#import "BPush.h"**
+
 	#import "BPush.h"
-	
-###2.2添加代码：在现有代码末尾，@end前面加入以下代码	
 
     - (void)application:(UIApplication *)application      didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
        NSLog(@"test:%@",deviceToken);
@@ -56,8 +64,9 @@ plugin.xml中
 	{
    		 NSLog(@"error=%@",error);
 	}
-	
-其中：
+
+
+其中以下部分代码用于自定义接受消息后处理模式
 
     if (application.applicationState == UIApplicationStateActive)
     {
@@ -69,21 +78,21 @@ plugin.xml中
                     otherButtonTitles:nil];
         [alertView show];
     }	
-这部分代码用于应用运行于前台时提示，用户可根据自身应该需求修改或删除	
 	
-## 3.修改BPushConfig.plist中API_KEY为申请得到的百度推送APP对应的API_KEY
 
-## 4.已知问题解决方案：
 
-### 4.1 如果xcode升级到5.1，则系统默认允许64位编译器编译，但是目前插件不支持，所以需要调整编译器配置
+## 2.4 生产版本
+
+BPushConfg.plist中的PRODUCT_MODE，如果是测试开发版请设置为NO，生产版设置为YES；
+修改BPushConfg.plis的配置后，请卸载应用再安装；
+
+
 选中Targets—>Build Settings—>Architectures。双击Architectures，选择other，删除$(ARCH_STANDARD)(点’-’)，然后增加armv7和armv7s(点‘+’)。clean一下再编译就行了。
 
-### 4.2如果编译时提示
+## 2.5 如果编译时提示
 
-Undefined symbols for architecture armv7s:
+	Undefined symbols for architecture armv7s:
 
-  "_OBJC_CLASS_$_BPush", referenced from:
+	  "_OBJC_CLASS_$_BPush", referenced from:
   
- 请注意检查libBpush.a 这个依赖库文件是否正确添加成功
- 
- 
+请注意检查libBpush.a 这个依赖库文件是否正确添加成功
