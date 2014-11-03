@@ -1,0 +1,152 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>pushManager Example</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+<body >
+<h1>push demo</h1>
+<label>appID:</label><label  id="appID">---</label></br>
+<label>userID:</label><label id="userID">---</label></br>
+<label>channelID:</label><label id="channelID">---</label></br></br>
+
+<input id ="btnInitWork" type="button" value="init" style="width:20em;height:3em;">
+</br>
+</br>
+<input id="addtags" type="text" placeholder="添加tag，多个Tag之间英文逗号分割" style="width:20em;height:3em;"></input>
+
+<input id ="btnSetTags" type="button" value="setTag" style="width:20em;height:3em;">
+    </br>
+    </br>
+<input id="deltags" type="text" placeholder="删除Tag，多个Tag之间英文逗号分割" style="width:20em;height:3em;"></input>
+<input id ="btnDelTags" type="button" value="delTags" style="width:20em;height:3em;">
+    </br>
+    </br>
+<input id ="btnListTags" type="button" value="ListTags" style="width:20em;height:3em;">
+    </br>
+    </br>
+<!--<input id ="btnTagsinfo" type="button" value="Tagsinfo(only Android)" style="width:20em;height:3em;">-->
+
+<script type="text/javascript" src="js/jQuery.js"></script>
+<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+    //init
+    function initFail(args){
+        alert("initFail:"+args);
+   }
+
+    function initSucc(args){
+        alert("userID = "+args.userID+"channelID = "+args.channelID+"appID = "+args.appID);
+        $("#appID").html(args.appID);
+        $("#userID").html(args.userID);
+        $("#channelID").html(args.channelID);
+    }
+
+	$("#btnInitWork").click(function() {
+    /*
+    window.plugin.pushManager.initWork(SuccessCallBack,FailCallBack,UserName,ServerUrl);
+      推送客户端初始化函数，包含以下三个参数：
+
+      SuccessCallBack: 初始化成功回调函数。该回调函数以参数形式返回一个对象，包含三个参数：userID，channelID，appID。 (Function)
+
+      FailCallBack: 初始化失败回调函数。 该回调函数以参数形式返回一个字符串说明失败原因。(Function)
+
+      UserName: 用户名，用于配合服务器端账号系统。 (String)
+
+      ServerUrl: 服务器地址，可选。 (String)
+
+      如果指定服务器地址，则init初始化成功后，客户端自动向指定服务器发送以下格式字符串信息："user_name=%@&action=initUser&appid=%@&user_id=%@&channel_id=%@&platform=%@" ，其中％@参数将被实际参数替换，
+
+      * user_name 传递用户名
+      * action 说明行为方式
+      * appid  传递当前应用appid
+      * user_id  当前用户userID
+      * channel_id 当前用户channelID
+      * platform   当前系统平台，如iOS或Android
+    */
+		window.plugin.pushManager.initWork(initSucc,initFail,"luoyadong","");
+	});
+
+    //setTags
+    function setTagsFail(args){
+        alert("setTagsFail:"+args);
+    }
+
+    function setTagSucc(args){
+        alert("setTagSSucc:"+args);
+    }
+	$("#btnSetTags").click(function() {
+    /*
+    setTags
+      设置标签
+
+      SuccessCallBack: 设置成功回调函数，返回值参见错误码。 (Function)
+
+      FailCallBack: 设置失败回调函数，返回值参见错误码。 (Function)
+
+      Tags: 设置标签内容，可以是多个标签，之间使用“,”分割。 (String)
+
+如果初始化时指定服务器地址，则setTags操作成功后，客户端自动向指定服务器发送以下格式字符串信息：“action=setTag&user_id=%@&tag=%@” ，其中％@参数将被实际参数替换，
+
+* user_id  当前用户userID
+* tag 设置tag信息
+    */
+		window.plugin.pushManager.setTags(setTagSucc,setTagsFail,$("#addtags").val());
+	});
+
+    //delTags
+    function delTagsFail(args){
+        alert("delTagsFail:"+args);
+    }
+
+    function delTagsSucc(args){
+        alert("delTagsSucc:"+args);
+    }
+	$("#btnDelTags").click(function() {
+    /*
+    delTags
+      删除标签
+
+      SuccessCallBack: 删除成功回调函数，返回值参见错误码。 (Function)
+
+      FailCallBack: 删除失败回调函数，返回值参见错误码。 (Function)
+
+      Tags: 删除标签内容，可以是多个标签，之间使用“,”分割。 (String)
+
+
+    */
+		window.plugin.pushManager.delTags(delTagsSucc,delTagsFail,$("#deltags").val());
+	});
+
+    //listTags
+    function listTagsSucc(taglist){
+                  alert("listTagsSucc:"+taglist);
+    }
+
+	$("#btnListTags").click(function() {
+    /*
+    listTags
+      列出所有标签
+      CallBack: 回调函数，返回字符串对象，包含所有tags，以","分割 (Function)
+
+      如果初始化时指定服务器地址，则delTags操作成功后，客户端自动向指定服务器发送以下格式字符串信息："action=delTag&user_id=%@&tag=%@" ，其中％@参数将被实际参数替换，
+
+* user_id  当前用户userID
+* tag 设置tag信息
+    */
+		window.plugin.pushManager.listTags(listTagsSucc);
+	});
+
+
+
+
+
+
+});
+
+</script>
+</body>
+</html>

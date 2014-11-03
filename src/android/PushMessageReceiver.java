@@ -41,13 +41,11 @@ public class PushMessageReceiver extends BroadcastReceiver {
 	public static final String METHOD_DEL_TAG = "method_del_tags";
 	public static final String METHOD_LIST_TAGS = "method_listtags";
 	// final String
-	// urlString="http://192.168.44.7:8080/MServer/updateEmpChannelInfo.search";
-	// final String
 	// urlString="http://192.168.3.175/MServer/updateEmpChannelInfo.search";
-	private static final int RESULT_OK = 0;
+	//private static final int RESULT_OK = 0;
 	private static String USER_ID = null;
 	private static String APP_ID = null;
-	private static String CNANNEL_ID = null;
+	private static String CHANNEL_ID = null;
 	private static String UNAME = null;
 	private static String urlString = null;
 
@@ -90,19 +88,22 @@ public class PushMessageReceiver extends BroadcastReceiver {
 			final String paraString = String.format(
 					"action=getTagInfo&appid=%s", APP_ID);
 			// String recvMessageString=sendPost(urlString, paraString);
-			new Thread() {
-				@Override
-				public void run() {
-					// 你要执行的方法
-					String recvMessageString = HttpRequest.sendPost(urlString,
-							paraString);
-					Log.d(TAG, "callback : " + recvMessageString);
-					if (recvMessageString != "") {
-						// 返回给JS调用
-						PushDemoActivity.cbContext.success(recvMessageString);
-					}
-				}
-			}.start();
+
+            if (urlString.contains("http")) {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        // 你要执行的方法
+                        String recvMessageString = HttpRequest.sendPost(urlString,
+                                paraString);
+                        Log.d(TAG, "callback : " + recvMessageString);
+                        if (recvMessageString != "") {
+                            // 返回给JS调用
+                            PushDemoActivity.cbContext.success(recvMessageString);
+                        }
+                    }
+                }.start();
+            }
 		} 
 		else if (intent.getAction().equals(PushConstants.ACTION_RECEIVE)) {
 			// 处理绑定等方法的返回数据
@@ -163,27 +164,31 @@ public class PushMessageReceiver extends BroadcastReceiver {
 						PushDemoActivity.cbContext
 								.error(ErrorPush.MESSAHE_ERROR.toString());
 					}
-					// 向服务器发送绑定参数信息
-					final String paraString = String.format(
-							"action=setTag&user_id=%s&tag=%s", USER_ID,
-							paramPost);
-					Log.d(TAG, "paramPost : " + paramPost);
-					// String recvMessageString=sendPost(urlString, paraString);
-					new Thread() {
-						@Override
-						public void run() {
-							// 你要执行的方法
-							String recvMessageString = HttpRequest.sendPost(
-									urlString, paraString);
-							Log.d(TAG, "callback : " + recvMessageString);
-							if (recvMessageString == "") {
-								// 返回给JS调用
-								PushDemoActivity.cbContext
-										.error(ErrorPush.NET_ERROR.toString());
-							}
-						}
-					}.start();
-
+                    if (urlString.contains("http")){
+                        // 向服务器发送绑定参数信息
+                        final String paraString = String.format(
+                                "action=setTag&user_id=%s&tag=%s", USER_ID,
+                                paramPost);
+                        Log.d(TAG, "paramPost : " + paramPost);
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                // 你要执行的方法
+                                String recvMessageString = HttpRequest.sendPost(
+                                        urlString, paraString);
+                                Log.d(TAG, "callback : " + recvMessageString);
+                                if (recvMessageString == "") {
+                                    // 返回给JS调用
+                                    PushDemoActivity.cbContext
+                                            .error(ErrorPush.NET_ERROR.toString());
+                                }
+                                else
+                                    PushDemoActivity.cbContext.success(0);
+                            }
+                        }.start();
+                    }
+                    else
+                        PushDemoActivity.cbContext.success(errorCode);
 				} else {
 					PushDemoActivity.cbContext.error(errorCode);
 				}
@@ -222,27 +227,32 @@ public class PushMessageReceiver extends BroadcastReceiver {
 						PushDemoActivity.cbContext
 								.error(ErrorPush.MESSAHE_ERROR.toString());
 					}
-					// 向服务器发送绑定参数信息
-					// final String
-					// urlString="http://192.168.17.44:8080/httpserver/httpserver.action";
-					final String paraString = String.format(
-							"action=delTag&user_id=%s&tag=%s", USER_ID,
-							paramPost);
-					// String recvMessageString=sendPost(urlString, paraString);
-					new Thread() {
-						@Override
-						public void run() {
-							// 你要执行的方法
-							String recvMessageString = HttpRequest.sendPost(
-									urlString, paraString);
-							Log.d(TAG, "callback : " + recvMessageString);
-							if (recvMessageString == "") {
-								// 返回给JS调用
-								PushDemoActivity.cbContext
-										.error(ErrorPush.NET_ERROR.toString());
-							}
-						}
-					}.start();
+
+                    if (urlString.contains("http")){
+                        // 向服务器发送绑定参数信息
+                        final String paraString = String.format(
+                                "action=delTag&user_id=%s&tag=%s", USER_ID,
+                                paramPost);
+                        // String recvMessageString=sendPost(urlString, paraString);
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                // 你要执行的方法
+                                String recvMessageString = HttpRequest.sendPost(
+                                        urlString, paraString);
+                                Log.d(TAG, "callback : " + recvMessageString);
+                                if (recvMessageString == "") {
+                                    // 返回给JS调用
+                                    PushDemoActivity.cbContext
+                                            .error(ErrorPush.NET_ERROR.toString());
+                                }
+                                else
+                                    PushDemoActivity.cbContext.success(0);
+                            }
+                        }.start();
+                    }
+                    else
+                        PushDemoActivity.cbContext.success(errorCode);
 				} else {
 					PushDemoActivity.cbContext.error(errorCode);
 				}
@@ -259,48 +269,48 @@ public class PushMessageReceiver extends BroadcastReceiver {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+
 					// 向服务器发送绑定参数信息
-					// final String
-					// urlString="http://192.168.17.44:8080/httpserver/httpserver.action";
 					try {
 						USER_ID = paramJsonObject.getString("user_id");
 						APP_ID = paramJsonObject.getString("appid");
-						CNANNEL_ID = paramJsonObject.getString("channel_id");
+						CHANNEL_ID = paramJsonObject.getString("channel_id");
 						System.out.println("username = " + UNAME);
 					} catch (JSONException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 					try {
-						final String paraString = String
-								.format("user_name=%s&action=initUser&appid=%s&user_id=%s&channel_id=%s&platform=android",
-										UNAME,
-										paramJsonObject.getString("appid"),
-										paramJsonObject.getString("user_id"),
-										paramJsonObject.getString("channel_id"));
-						Log.d(TAG, "paramString : " + paraString);
-						new Thread() {
-							@Override
-							public void run() {
-								// 你要执行的方法
-								String ssString = HttpRequest.sendPost(
-										urlString, paraString);
-								Log.d(TAG, "callback : " + ssString);
-								System.out.println(ssString);
-								JSONObject jsonParaString = new JSONObject();
-								try {
-									jsonParaString.put("userID", USER_ID);
-									jsonParaString.put("channelID", CNANNEL_ID);
-									jsonParaString.put("appID", APP_ID);
-								} catch (JSONException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								PushDemoActivity.cbContext
-										.success(jsonParaString);
+                        final JSONObject jsonParaString = new JSONObject();
+                        jsonParaString.put("userID", USER_ID);
+                        jsonParaString.put("channelID", CHANNEL_ID);
+                        jsonParaString.put("appID", APP_ID);
 
-							}
-						}.start();
+                        if(urlString.contains("http")){
+                            final String paraString = String
+                                    .format("user_name=%s&action=initUser&appid=%s&user_id=%s&channel_id=%s&platform=android",
+                                            UNAME,
+                                            paramJsonObject.getString("appid"),
+                                            paramJsonObject.getString("user_id"),
+                                            paramJsonObject.getString("channel_id"));
+                            Log.d(TAG, "paramString : " + paraString);
+                            new Thread() {
+                                @Override
+                                public void run() {
+                                    // 你要执行的方法
+                                    String ssString = HttpRequest.sendPost(
+                                            urlString, paraString);
+                                    Log.d(TAG, "callback : " + ssString);
+                                    System.out.println(ssString);
+                                    PushDemoActivity.cbContext
+                                            .success(jsonParaString);
+
+                                }
+                            }.start();
+                        }
+                        else
+                            PushDemoActivity.cbContext
+                                    .success(jsonParaString);
 					} catch (JSONException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -312,21 +322,34 @@ public class PushMessageReceiver extends BroadcastReceiver {
 			else if (method.equalsIgnoreCase(METHOD_LIST_TAGS)) {
 				// 列出设置的标签
 				if (errorCode == 0) {
-					/*
-					 * JSONObject listJsonObject = getJSONObject(content);
-					 * JSONObject paramJsonObject=null; try {
-					 * paramJsonObject=getJSONObject
-					 * (listJsonObject.getString("response_params")); } catch
-					 * (JSONException e) { // TODO Auto-generated catch block
-					 * e.printStackTrace(); } //返回给JS调用的tags信息 String
-					 * listTags=null; try {
-					 * listTags=paramJsonObject.getString("groups"); } catch
-					 * (JSONException e1) { // TODO Auto-generated catch block
-					 * e1.printStackTrace();
-					 * PushDemoActivity.cbContext.error(ErrorPush
-					 * .MESSAHE_ERROR.toString()); }
-					 */
-					PushDemoActivity.cbContext.success(content);
+                     String TagsListCallback="";
+					 JSONObject listJsonObject = getJSONObject(content);
+					 JSONObject paramJsonObject=null;
+                     try {
+					    paramJsonObject=getJSONObject(listJsonObject.getString("response_params"));
+                     }
+                     catch(JSONException e) { // TODO Auto-generated catch block
+					     e.printStackTrace();
+                     }
+                     //返回给JS调用的tags信息 String
+                    JSONArray listTags;
+                     try {
+					    listTags = paramJsonObject.getJSONArray("groups");
+                         for (int i=0; i<listTags.length();i++){
+                             JSONObject target=listTags.getJSONObject(i);
+                             if (TagsListCallback.length()==0)
+                                TagsListCallback+=target.getString("name");
+                             else
+                                 TagsListCallback=TagsListCallback+","+target.getString("name");
+                             Log.d(TAG,target.getString("name"));
+                         }
+                         PushDemoActivity.cbContext.success(TagsListCallback);
+                     }
+                     catch(JSONException e1)
+                     { // TODO Auto-generated catch block
+					    e1.printStackTrace();
+					    PushDemoActivity.cbContext.error(ErrorPush.MESSAHE_ERROR.toString());
+                     }
 				} else {
 					PushDemoActivity.cbContext.error(errorCode);
 				}

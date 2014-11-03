@@ -8,8 +8,7 @@
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple Inc.
  ("Apple") in consideration of your agreement to the following terms, and your
  use, installation, modification or redistribution of this Apple software
- constitutes acceptance of
- these terms.  If you do not agree with these terms,
+ constitutes acceptance of these terms.  If you do not agree with these terms,
  please do not use, install, modify or redistribute this Apple software.
  
  In consideration of your agreement to abide by the following terms, and subject
@@ -57,7 +56,7 @@
 
 #import "Reachability.h"
 
-#define kShouldPrintReachabilityFlags 0
+#define kShouldPrintReachabilityFlags 1
 
 static void PrintReachabilityFlags(SCNetworkReachabilityFlags    flags, const char* comment)
 {

@@ -9,8 +9,8 @@
 #import <Foundation/Foundation.h>
 
 
-#define VERSION_NAME  @"1.0.0"
-#define VERSION  2
+#define VERSION_NAME  @"1.2.0"
+#define VERSION  4
 
 @protocol BPushDelegate <NSObject>
 
@@ -27,7 +27,6 @@
 @end
 
 @interface BPush : NSObject
-
 
 /**
  * binChannel的回调
@@ -68,7 +67,7 @@
 + (void)setBduss:(NSString *)bduss forApp:(NSString *)appid;
 
 /**
- * 绑定channel. 成功后，如果用户有注册delegate并实现onBindChannel，将会回调该函数
+ * 绑定channel. 如果用户有注册delegate并实现onMethod:response:，将会回调该函数，通过method参数来判断返回的方法。
  * @param
  *     none
  * @return
@@ -77,7 +76,7 @@
 + (void)bindChannel;
 
 /**
- * 解绑定channel. 成功后，如果用户有注册delegate并实现onBindChannel，将会回调该函数
+ * 解绑定channel. 如果用户有注册delegate并实现onMethod:response:，将会回调该函数，通过method参数来判断返回的方法。
  * @param
  *     none
  * @return
@@ -86,7 +85,7 @@
 + (void)unbindChannel;
 
 /**
- * 设置tag
+ * 设置tag。如果用户有注册delegate并实现onMethod:response:，将会回调该函数，通过method参数来判断返回的方法。
  * @param
  *     tag - 需要设置的tag
  * @return
@@ -95,7 +94,7 @@
 + (void)setTag:(NSString *)tag;
 
 /**
- * 设置多个tag
+ * 设置多个tag。如果用户有注册delegate并实现onMethod:response:，将会回调该函数，通过method参数来判断返回的方法。
  * @param
  *     tags - 需要设置的tag数组
  * @return
@@ -104,7 +103,7 @@
 + (void)setTags:(NSArray *)tags;
 
 /**
- * 删除tag
+ * 删除tag。如果用户有注册delegate并实现onMethod:response:，将会回调该函数，通过method参数来判断返回的方法。
  * @param
  *     tag - 需要删除的tag
  * @return
@@ -113,7 +112,7 @@
 + (void)delTag:(NSString *)tag;
 
 /**
- * 删除多个tag
+ * 删除多个tag。如果用户有注册delegate并实现onMethod:response:，将会回调该函数，通过method参数来判断返回的方法。
  * @param
  *     tags - 需要删除的tag数组
  * @return
@@ -122,14 +121,13 @@
 + (void)delTags:(NSArray *)tags;
 
 /**
- * 获取当前设备应用的tag列表
+ * 获取当前设备应用的tag列表。如果用户有注册delegate并实现onMethod:response:，将会回调该函数，通过method参数来判断返回的方法。
  * @param
  *     none
  * @return
  *     none
  */
-// 暂不支持
-//+ (void)listTags;
++ (void)listTags;
 
 /**
  * 在didReceiveRemoteNotification中调用，用于推送反馈

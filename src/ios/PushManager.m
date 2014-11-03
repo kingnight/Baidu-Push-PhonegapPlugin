@@ -11,33 +11,47 @@
 @interface PushManager()
 @property (nonatomic,strong) NSString *userName;
 @property (nonatomic,strong) NSString *callid_init;
+@property (nonatomic,strong) NSString *callid_deinit;
 @property (nonatomic,strong) NSString *callid_setTags;
 @property (nonatomic,strong) NSString *callid_delTags;
+@property (nonatomic,strong) NSString *callid_listTags;
 @property (nonatomic,strong) NSString *serverUrl;
 @end
 
 @implementation PushManager
 
 - (void) initWork:(CDVInvokedUrlCommand*)command{
-    //NSLog(@"On initWork:");
-    self.userName=[[NSString alloc]initWithFormat:@"%@",[command argumentAtIndex:0]];
-    self.serverUrl=[[NSString alloc]initWithFormat:@"%@",[command argumentAtIndex:1]];
-    
-    self.callid_init=[[NSString alloc] initWithString:[NSString stringWithFormat:@"%@",command.callbackId]];
-    [BPush setupChannel:nil];
-    [BPush setDelegate:self];
-    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
-    [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
-     UIRemoteNotificationTypeAlert
-     | UIRemoteNotificationTypeBadge
-     | UIRemoteNotificationTypeSound];
-    //NSLog(@"On bindChannel:");
-    [BPush bindChannel];
-    
+    [self.commandDelegate runInBackground:^{
+        NSLog(@"On initWork:");
+        self.userName=[[NSString alloc]initWithFormat:@"%@",[command argumentAtIndex:0]];
+        self.serverUrl=[[NSString alloc]initWithFormat:@"%@",[command argumentAtIndex:1]];
+        
+        self.callid_init=[[NSString alloc] initWithString:[NSString stringWithFormat:@"%@",command.callbackId]];
+        
+        [BPush setDelegate:self];
+        //[[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
+#if SUPPORT_IOS8
+        if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0) {
+            UIUserNotificationType myTypes = UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeSound;
+            UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:myTypes categories:nil];
+            [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+        }else
+#endif
+        {
+            UIRemoteNotificationType myTypes = UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound;
+            [[UIApplication sharedApplication] registerForRemoteNotificationTypes:myTypes];
+        }
+        //NSLog(@"On bindChannel:");
+        [BPush bindChannel];
+    }];
+}
+
+- (void) stopWork:(CDVInvokedUrlCommand*)command{
+    self.callid_deinit=[[NSString alloc] initWithString:[NSString stringWithFormat:@"%@",command.callbackId]];
+    [BPush unbindChannel];
 }
 
 - (void) setTags:(CDVInvokedUrlCommand*)command{
-    //NSLog(@"setTags server ");
     self.callid_setTags=[[NSString alloc] initWithString:[NSString stringWithFormat:@"%@",command.callbackId]];
     NSString *parameters = [command.arguments objectAtIndex:0];
     //NSLog(@"setTags server %@",parameters);
@@ -46,22 +60,21 @@
 }
 
 - (void) delTags:(CDVInvokedUrlCommand*)command{
-    //NSLog(@"setTags server ");
     self.callid_delTags=[[NSString alloc] initWithString:[NSString stringWithFormat:@"%@",command.callbackId]];
     NSString *parameters = [command.arguments objectAtIndex:0];
-    //NSLog(@"setTags server %@",parameters);
+    //NSLog(@"delTags server %@",parameters);
     NSArray *tags = [parameters componentsSeparatedByString:@","];
     [BPush delTags:tags];
 }
 
-- (void) stopWork:(CDVInvokedUrlCommand*)command{
-    
-    [BPush unbindChannel];
+-(void) listTags:(CDVInvokedUrlCommand*)command{
+    self.callid_listTags=[[NSString alloc] initWithString:[NSString stringWithFormat:@"%@",command.callbackId]];
+    [BPush listTags];
 }
 
 - (void) onMethod:(NSString*)method response:(NSDictionary*)data {
-    //NSLog(@"On method:%@", method);
-    //NSLog(@"data:%@", [data description]);
+    NSLog(@"On method:%@", method);
+    NSLog(@"data:%@", [data description]);
     NSDictionary* res = [[NSDictionary alloc] initWithDictionary:data];
     NSString * appid = [res valueForKey:BPushRequestAppIdKey];
     NSString * userid = [res valueForKey:BPushRequestUserIdKey];
@@ -81,7 +94,7 @@
                 NSString *post = [NSString stringWithFormat:@"user_name=%@&action=initUser&appid=%@&user_id=%@&channel_id=%@&platform=ios",userNameforload,appid,userid,channelid ];
                 NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
                 
-                NSString *postLength = [NSString stringWithFormat:@"%d", [postData length]];
+                NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[postData length]];
                 
                 NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
                 [request setURL:[NSURL URLWithString:[self serverUrl]]];
@@ -106,21 +119,26 @@
         }
         else{
             NSString *code=[self translateBPushErrorCode:returnCode];
-            NSLog(@"PUSH ERROR:%@",code);
+            NSLog(@"bind ERROR:%@",code);
             
             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:returnCode];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callid_init];
         }
     }
+    
     else if ([BPushRequestMethod_Unbind isEqualToString:method]) {
         int returnCode = [[res valueForKey:BPushRequestErrorCodeKey] intValue];
         if (returnCode == BPushErrorCode_Success) {
-            
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:returnCode];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callid_deinit];
         }
         else
         {
             NSString *code=[self translateBPushErrorCode:returnCode];
-            NSLog(@"PUSH ERROR:%@",code);
+            NSLog(@"unbind ERROR:%@",code);
+            
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:returnCode];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callid_deinit];
         }
     }
     else if ([BPushRequestMethod_SetTag isEqualToString:method]){
@@ -144,7 +162,7 @@
                 NSString *post = [NSString stringWithFormat:@"action=setTag&user_id=%@&tag=%@",[BPush getUserId],tags];
                 NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
                 
-                NSString *postLength = [NSString stringWithFormat:@"%d", [postData length]];
+                NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[postData length]];
                 
                 NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
                 [request setURL:[NSURL URLWithString:[self serverUrl]]];
@@ -165,7 +183,7 @@
             
         }else{
             NSString *code=[self translateBPushErrorCode:returnCode];
-            NSLog(@"PUSH ERROR:%@",code);
+            NSLog(@"setTag ERROR:%@",code);
             
             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:returnCode];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callid_setTags];
@@ -194,7 +212,7 @@
                 NSString *post = [NSString stringWithFormat:@"action=delTag&user_id=%@&tag=%@",[BPush getUserId],tags ];
                 NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
                 
-                NSString *postLength = [NSString stringWithFormat:@"%d", [postData length]];
+                NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[postData length]];
                 
                 NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
                 [request setURL:[NSURL URLWithString:[self serverUrl]]];
@@ -217,14 +235,33 @@
         }
         else{
             NSString *code=[self translateBPushErrorCode:returnCode];
-            NSLog(@"PUSH ERROR:%@",code);
+            NSLog(@"delTag ERROR:%@",code);
             
             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:returnCode];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callid_delTags];
         }
     }
+    else if ([BPushRequestMethod_ListTag isEqualToString:method]){
+        NSDictionary *response_param=[res valueForKey:BPushRequestResponseParamsKey];
+        NSArray *tagsArray=[response_param valueForKey:@"tags"];
+        NSString *tagslist=[NSString stringWithFormat:@"%@", nil];
+        int i;
+        for (i=0; i<[tagsArray count]; i++) {
+            if (i==0) {
+                tagslist=[NSString stringWithFormat:@"%@", [[tagsArray objectAtIndex:i] valueForKey:@"name"]];
+            }else{
+                tagslist=[NSString stringWithFormat:@"%@,%@", tagslist,[[tagsArray objectAtIndex:i] valueForKey:@"name"]];
+            }
+        }
+        NSLog(@"list tags %@",tagslist);
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:tagslist];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callid_listTags];
+    }
     
 }
+
+
+
 /*
  *BpushErrorCode_Success = 0,
  BpushErrorCode_MethodTooOften = 22, // 方法调用太频繁，如循环调用 bind
@@ -240,35 +277,35 @@
 -(NSString*)translateBPushErrorCode:(int)returnCode{
     switch (returnCode) {
         case BPushErrorCode_MethodTooOften:
-        return @"方法调用太频繁，如循环调用 bind";
-        break;
+            return @"方法调用太频繁，如循环调用 bind";
+            break;
         case BPushErrorCode_NetworkInvalible:
-        return @"网络连接错误";
-        break;
+            return @"网络连接错误";
+            break;
         case BPushErrorCode_InternalError:
-        return @"服务器内部错误";
-        break;
+            return @"服务器内部错误";
+            break;
         case BPushErrorCode_MethodNodAllowed:
-        return @"请求方法不允许";
-        break;
+            return @"请求方法不允许";
+            break;
         case BPushErrorCode_ParamsNotValid:
-        return @"请求参数错误";
-        break;
+            return @"请求参数错误";
+            break;
         case BPushErrorCode_AuthenFailed:
-        return @"权限验证失败";
-        break;
+            return @"权限验证失败";
+            break;
         case BPushErrorCode_DataNotFound:
-        return @"请求数据不存在";
-        break;
+            return @"请求数据不存在";
+            break;
         case BPushErrorCode_RequestExpired:
-        return @"请求时间戳验证超时";
-        break;
+            return @"请求时间戳验证超时";
+            break;
         case BPushErrorCode_BindNotExists:
-        return @"绑定关系不存在";
-        break;
+            return @"绑定关系不存在";
+            break;
         default:
-        return nil;
-        break;
+            return nil;
+            break;
     }
 }
 
