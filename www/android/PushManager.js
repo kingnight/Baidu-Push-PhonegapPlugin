@@ -1,4 +1,4 @@
-cordova.define("com.aisino.plugin.push.PushManager", function(require, exports, module) { var exec = require("cordova/exec");
+var exec = require("cordova/exec");
 	var PushManager = function () {};
 	
 	PushManager.prototype.initWork = function(successCallback,errorCallback,username,severurl) {
@@ -27,6 +27,3 @@ cordova.define("com.aisino.plugin.push.PushManager", function(require, exports, 
 	};
 	
 	module.exports = new PushManager();
-
-
-});
